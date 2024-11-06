@@ -84,8 +84,13 @@ export const createSpecificShape = (
 
     case "text":
       return createText(pointer, "Tap to Type");
+
     case "button":
       return createEditableButton(pointer);
+
+    case "location":
+      return createLocationCoordinates(pointer);
+
     default:
       return null;
   }
@@ -239,4 +244,47 @@ export const createEditableButton = (pointer: PointerEvent) => {
   } as fabric.IGroupOptions & { objectId: string });
 
   return group;
+};
+
+export const createLocationCoordinates = (pointer: PointerEvent) => {
+  // Créer d'abord un texte temporaire
+  const tempText = new fabric.IText("Chargement des coordonnées...", {
+    left: pointer.x,
+    top: pointer.y,
+    fill: "#aabbcc",
+    fontFamily: "Arial",
+    fontSize: 20,
+    objectId: uuidv4(),
+  } as any);
+
+  // Obtenir la position et mettre à jour le texte
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const { latitude, longitude } = position.coords;
+    
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+      const address = data.display_name;
+      
+      const text = `${address}\nLatitude: ${latitude}, Longitude: ${longitude}`;
+      tempText.set('text', text);
+      
+      // Forcer le rafraîchissement du canvas si nécessaire
+      if (tempText.canvas) {
+        tempText.canvas.renderAll();
+      }
+    } catch (error) {
+      console.error("Erreur lors de la récupération de l'adresse:", error);
+      const text = `Latitude: ${latitude}, Longitude: ${longitude}`;
+      tempText.set('text', text);
+      
+      if (tempText.canvas) {
+        tempText.canvas.renderAll();
+      }
+    }
+  });
+
+  return tempText;
 };
