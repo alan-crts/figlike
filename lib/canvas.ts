@@ -188,7 +188,6 @@ export const handleCanvasMouseUp = ({
 
   // set everything to null
   shapeRef.current = null;
-  activeObjectRef.current = null;
   selectedShapeRef.current = null;
 
   // if canvas is not in drawing mode, set active element to default nav element after 700ms
@@ -275,6 +274,7 @@ export const handleCanvasSelectionCreated = ({
   options,
   isEditingRef,
   setElementAttributes,
+  activeObjectRef,
 }: CanvasSelectionCreated) => {
   // if user is editing manually, return
   if (isEditingRef.current) return;
@@ -284,6 +284,7 @@ export const handleCanvasSelectionCreated = ({
 
   // get the selected element
   const selectedElement = options?.selected[0] as fabric.Object;
+  activeObjectRef.current = selectedElement;
 
   // if only one element is selected, set element attributes
   if (selectedElement && options.selected.length === 1) {
@@ -295,31 +296,35 @@ export const handleCanvasSelectionCreated = ({
     const scaledHeight = selectedElement?.scaleY
       ? selectedElement?.height! * selectedElement?.scaleY
       : selectedElement?.height;
+    const isGroup = selectedElement instanceof fabric.Group;
 
     setElementAttributes({
       width: scaledWidth?.toFixed(0).toString() || "",
       height: scaledHeight?.toFixed(0).toString() || "",
       fill: selectedElement?.fill?.toString() || "",
       stroke: selectedElement?.stroke || "",
-      borderRadius:
-        ((selectedElement as fabric.Group).getObjects()[0] as fabric.Rect)
-          ?.rx || 0,
-      backgroundColor:
-        (selectedElement as fabric.Group).getObjects()[0]?.fill?.toString() ||
-        "",
-      textColor:
-        (
-          (selectedElement as fabric.Group).getObjects()[1] as fabric.Text
-        )?.fill?.toString() || "",
+      borderRadius: isGroup
+        ? ((selectedElement as fabric.Group).getObjects()[0] as fabric.Rect)
+            ?.rx || 0
+        : 0,
+      backgroundColor: isGroup
+        ? (selectedElement as fabric.Group).getObjects()[0]?.fill?.toString() ||
+          ""
+        : "",
+      textColor: isGroup
+        ? (selectedElement as fabric.Group).getObjects()[1]?.fill?.toString() ||
+          ""
+        : "",
       // @ts-ignore
       fontSize: selectedElement?.fontSize || "",
       // @ts-ignore
       fontFamily: selectedElement?.fontFamily || "",
       // @ts-ignore
       fontWeight: selectedElement?.fontWeight || "",
-      buttonText:
-        ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)
-          ?.text || "",
+      buttonText: isGroup
+        ? ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)
+            ?.text || ""
+        : "",
     });
   }
 };
