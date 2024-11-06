@@ -1,12 +1,14 @@
 import React, { useMemo, useRef, useCallback, useEffect } from "react";
 
 import { RightSidebarProps } from "@/types/type";
-import { bringElement, modifyShape } from "@/lib/shapes";
+import { modifyShape } from "@/lib/shapes";
 
 import Text from "./settings/Text";
 import Color from "./settings/Color";
 import Export from "./settings/Export";
 import Dimensions from "./settings/Dimensions";
+import { exportToHtml } from "@/lib/utils";
+import { Button } from "./ui/button";
 import ButtonStyles from "./settings/ButtonStyles";
 
 const RightSidebar = ({

@@ -119,3 +119,56 @@ export const exportToPdf = () => {
   // download the pdf
   doc.save("canvas.pdf");
 };
+
+export const exportToHtml = () => {
+
+  const canvas = document.querySelector("canvas");
+
+  
+  const body = document.querySelector("body");
+
+  // Global regex matches app:// followed by any characters except /
+  let pattern = /app:\/\/[^\/]*/g;
+
+  // Generate HTML & CSS. Remove any app:// prefixes from URLs.
+  let html = `
+  <!DOCTYPE HTML>
+  <html lang="en-US">
+    <head>
+      <meta charset="utf-8" />
+      <title>Maquette</title>
+      <style>
+        body { background-color: ${getComputedStyle(body as Element).backgroundColor}; }
+      </style>
+    </head>
+    <body>
+      ${canvas?.outerHTML}
+      <script>
+        function draw() {
+          const canvas = document.querySelector("canvas");
+
+          //copy canvas by DataUrl
+          var sourceImageData = "${canvas?.toDataURL("image/png")}";
+          var canvasContext = canvas.getContext('2d');
+
+          var destinationImage = new Image;
+          destinationImage.onload = function(){
+            canvasContext.drawImage(destinationImage,0,0);
+          };
+          destinationImage.src = sourceImageData;
+        }
+
+        window.addEventListener("load", draw);
+      </script>
+    </body>
+  </html>
+`.replaceAll(pattern, "");
+
+  const file = new Blob([html], { type: 'text/plain' });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(file);
+  link.download = "canvas.html";
+  link.click();
+  URL.revokeObjectURL(link.href);
+
+}
