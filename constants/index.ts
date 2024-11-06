@@ -69,6 +69,11 @@ export const navElements = [
     value: "comments",
     name: "Comments",
   },
+  {
+    icon: "/assets/location.svg",
+    value: "location",
+    name: "Location",
+  },
 ];
 
 export const defaultNavElement = {
