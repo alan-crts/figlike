@@ -61,7 +61,7 @@ export const createText = (pointer: PointerEvent, text: string) => {
     fontFamily: "Helvetica",
     fontSize: 36,
     fontWeight: "400",
-    objectId: uuidv4()
+    objectId: uuidv4(),
   } as fabric.ITextOptions);
 };
 
@@ -84,7 +84,8 @@ export const createSpecificShape = (
 
     case "text":
       return createText(pointer, "Tap to Type");
-
+    case "button":
+      return createEditableButton(pointer);
     default:
       return null;
   }
@@ -142,21 +143,45 @@ export const modifyShape = ({
 
   if (!selectedElement || selectedElement?.type === "activeSelection") return;
 
-  // if  property is width or height, set the scale of the selected element
-  if (property === "width") {
-    selectedElement.set("scaleX", 1);
-    selectedElement.set("width", value);  
-  } else if (property === "height") {
-    selectedElement.set("scaleY", 1);
-    selectedElement.set("height", value);
+  if (selectedElement.type === "group") {
+    const [buttonRect, buttonText] = (
+      selectedElement as fabric.Group
+    ).getObjects();
+
+    switch (property) {
+      case "backgroundColor":
+        (buttonRect as fabric.Rect).set("fill", value);
+        break;
+      case "textColor":
+        (buttonText as fabric.Text).set("fill", value);
+        break;
+      case "borderRadius":
+        (buttonRect as fabric.Rect).set({
+          rx: parseInt(value),
+          ry: parseInt(value),
+        });
+        break;
+      case "buttonText":
+        (buttonText as fabric.Text).set("text", value);
+        break;
+      default:
+        selectedElement.set(property as keyof object, value);
+    }
   } else {
-    if (selectedElement[property as keyof object] === value) return;
-    selectedElement.set(property as keyof object, value);
+    // Gestion existante pour les autres formes
+    if (property === "width") {
+      selectedElement.set("scaleX", 1);
+      selectedElement.set("width", value);
+    } else if (property === "height") {
+      selectedElement.set("scaleY", 1);
+      selectedElement.set("height", value);
+    } else {
+      selectedElement.set(property as keyof object, value);
+    }
   }
 
-  // set selectedElement to activeObjectRef
   activeObjectRef.current = selectedElement;
-
+  canvas.renderAll();
   syncShapeInStorage(selectedElement);
 };
 
@@ -183,4 +208,35 @@ export const bringElement = ({
   syncShapeInStorage(selectedElement);
 
   // re-render all objects on the canvas
+};
+
+export const createEditableButton = (pointer: PointerEvent) => {
+  const buttonRect = new fabric.Rect({
+    width: 150,
+    height: 50,
+    fill: "#4CAF50",
+    rx: 8,
+    ry: 8,
+  });
+
+  const buttonText = new fabric.IText("Bouton", {
+    fontSize: 20,
+    fill: "#FFFFFF",
+    textAlign: "center",
+    originX: "center",
+    originY: "center",
+    fontFamily: "Arial",
+    left: buttonRect.width! / 2,
+    top: buttonRect.height! / 2,
+  });
+
+  const group = new fabric.Group([buttonRect, buttonText], {
+    left: pointer.x,
+    top: pointer.y,
+    objectId: uuidv4(),
+    subTargetCheck: true,
+    selectable: true,
+  } as fabric.IGroupOptions & { objectId: string });
+
+  return group;
 };

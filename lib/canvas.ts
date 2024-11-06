@@ -301,12 +301,25 @@ export const handleCanvasSelectionCreated = ({
       height: scaledHeight?.toFixed(0).toString() || "",
       fill: selectedElement?.fill?.toString() || "",
       stroke: selectedElement?.stroke || "",
+      borderRadius:
+        ((selectedElement as fabric.Group).getObjects()[0] as fabric.Rect)
+          ?.rx || 0,
+      backgroundColor:
+        (selectedElement as fabric.Group).getObjects()[0]?.fill?.toString() ||
+        "",
+      textColor:
+        (
+          (selectedElement as fabric.Group).getObjects()[1] as fabric.Text
+        )?.fill?.toString() || "",
       // @ts-ignore
       fontSize: selectedElement?.fontSize || "",
       // @ts-ignore
       fontFamily: selectedElement?.fontFamily || "",
       // @ts-ignore
       fontWeight: selectedElement?.fontWeight || "",
+      buttonText:
+        ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)
+          ?.text || "",
     });
   }
 };
