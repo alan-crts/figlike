@@ -323,17 +323,17 @@ const Home = () => {
      * Event inspector: http://fabricjs.com/events
      * Event list: http://fabricjs.com/docs/fabric.Canvas.html#fire
      */
-    // canvas.on("mouse:up", () => {
-    //   handleCanvasMouseUp({
-    //     canvas,
-    //     isDrawing,
-    //     shapeRef,
-    //     activeObjectRef,
-    //     selectedShapeRef,
-    //     syncShapeInStorage,
-    //     setActiveElement,
-    //   });
-    // });
+    canvas.on("mouse:up", () => {
+      handleCanvasMouseUp({
+        canvas,
+        isDrawing,
+        shapeRef,
+        activeObjectRef,
+        selectedShapeRef,
+        syncShapeInStorage,
+        setActiveElement,
+      });
+    });
 
     /**
      * listen to the path created event on the canvas which is fired when

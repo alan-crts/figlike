@@ -93,7 +93,7 @@ export const handleCanvasMouseDown = async ({
       shapeRef.current = await createSpecificShape(
         selectedShapeRef.current,
         pointer as any
-      )
+      );
 
       if (shapeRef.current) {
         canvas.add(shapeRef.current);
@@ -294,8 +294,6 @@ export const handleCanvasSelectionCreated = ({
       : selectedElement?.height;
     const isGroup = selectedElement instanceof fabric.Group;
 
-    const isGroup = selectedElement instanceof fabric.Group;
-    
     setElementAttributes({
       width: scaledWidth?.toFixed(0).toString() || "",
       height: scaledHeight?.toFixed(0).toString() || "",
