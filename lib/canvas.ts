@@ -38,7 +38,7 @@ export const initializeFabric = ({
 };
 
 // instantiate creation of custom fabric object/shape and add it to canvas
-export const handleCanvasMouseDown = ({
+export const handleCanvasMouseDown = async ({
   options,
   canvas,
   selectedShapeRef,
@@ -88,16 +88,18 @@ export const handleCanvasMouseDown = ({
   } else {
     isDrawing.current = true;
 
-    // create custom fabric object/shape and set it to shapeRef
-    shapeRef.current = createSpecificShape(
-      selectedShapeRef.current,
-      pointer as any
-    );
+    try {
+      // Attendre la résolution de createSpecificShape avec await
+      shapeRef.current = await createSpecificShape(
+        selectedShapeRef.current,
+        pointer as any
+      )
 
-    // if shapeRef is not null, add it to canvas
-    if (shapeRef.current) {
-      // add: http://fabricjs.com/docs/fabric.Canvas.html#add
-      canvas.add(shapeRef.current);
+      if (shapeRef.current) {
+        canvas.add(shapeRef.current);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la création de la forme:", error);
     }
   }
 };

@@ -65,10 +65,10 @@ export const createText = (pointer: PointerEvent, text: string) => {
   } as fabric.ITextOptions);
 };
 
-export const createSpecificShape = (
+export const createSpecificShape = async (
   shapeType: string,
   pointer: PointerEvent
-) => {
+): Promise<fabric.Object | null> => {
   switch (shapeType) {
     case "rectangle":
       return createRectangle(pointer);
@@ -89,7 +89,7 @@ export const createSpecificShape = (
       return createEditableButton(pointer);
 
     case "location":
-      return createLocationCoordinates(pointer);
+      return await createLocationCoordinates(pointer);
 
     default:
       return null;
@@ -246,45 +246,37 @@ export const createEditableButton = (pointer: PointerEvent) => {
   return group;
 };
 
-export const createLocationCoordinates = (pointer: PointerEvent) => {
-  // Créer d'abord un texte temporaire
-  const tempText = new fabric.IText("Chargement des coordonnées...", {
-    left: pointer.x,
-    top: pointer.y,
-    fill: "#aabbcc",
-    fontFamily: "Arial",
-    fontSize: 20,
-    objectId: uuidv4(),
-  } as any);
-
-  // Obtenir la position et mettre à jour le texte
+export const createLocationCoordinates = async (pointer: PointerEvent) : Promise<fabric.Object | null> => {
+  return new Promise((resolve, reject) => {
   navigator.geolocation.getCurrentPosition(async (position) => {
     const { latitude, longitude } = position.coords;
     
-    try {
       const response = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
       );
       const data = await response.json();
       const address = data.display_name;
+
+      console.log(address);
       
       const text = `${address}\nLatitude: ${latitude}, Longitude: ${longitude}`;
-      tempText.set('text', text);
       
-      // Forcer le rafraîchissement du canvas si nécessaire
-      if (tempText.canvas) {
-        tempText.canvas.renderAll();
-      }
-    } catch (error) {
-      console.error("Erreur lors de la récupération de l'adresse:", error);
-      const text = `Latitude: ${latitude}, Longitude: ${longitude}`;
-      tempText.set('text', text);
-      
-      if (tempText.canvas) {
-        tempText.canvas.renderAll();
-      }
-    }
-  });
+      const textObject = new fabric.Text(text, {
+        left: pointer.x,
+        top: pointer.y,
+        fill: "#FFFFFF",
+        fontFamily: "Arial",
+        fontSize: 20,
+        objectId: uuidv4(),
+        selectable: true,
+        editable: false,
+      } as fabric.ITextOptions);
 
-  return tempText;
+      resolve(textObject);
+    },
+    (error) => {
+      reject(error);
+    }
+  );
+  });
 };
