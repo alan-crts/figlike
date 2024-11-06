@@ -141,7 +141,6 @@ export const modifyShape = ({
   canvas,
   property,
   value,
-  activeObjectRef,
   syncShapeInStorage,
 }: ModifyShape) => {
   const selectedElement = canvas.getActiveObject();
@@ -185,7 +184,6 @@ export const modifyShape = ({
     }
   }
 
-  activeObjectRef.current = selectedElement;
   canvas.renderAll();
   syncShapeInStorage(selectedElement);
 };

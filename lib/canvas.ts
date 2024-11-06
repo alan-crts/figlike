@@ -190,7 +190,6 @@ export const handleCanvasMouseUp = ({
 
   // set everything to null
   shapeRef.current = null;
-  activeObjectRef.current = null;
   selectedShapeRef.current = null;
 
   // if canvas is not in drawing mode, set active element to default nav element after 700ms
@@ -277,11 +276,13 @@ export const handleCanvasSelectionCreated = ({
   options,
   isEditingRef,
   setElementAttributes,
+  activeObjectRef,
 }: CanvasSelectionCreated) => {
   if (isEditingRef.current) return;
   if (!options?.selected) return;
 
   const selectedElement = options?.selected[0] as fabric.Object;
+  activeObjectRef.current = selectedElement;
 
   if (selectedElement && options.selected.length === 1) {
     const scaledWidth = selectedElement?.scaleX
@@ -291,6 +292,7 @@ export const handleCanvasSelectionCreated = ({
     const scaledHeight = selectedElement?.scaleY
       ? selectedElement?.height! * selectedElement?.scaleY
       : selectedElement?.height;
+    const isGroup = selectedElement instanceof fabric.Group;
 
     const isGroup = selectedElement instanceof fabric.Group;
     
@@ -300,19 +302,26 @@ export const handleCanvasSelectionCreated = ({
       fill: selectedElement?.fill?.toString() || "",
       stroke: selectedElement?.stroke || "",
       borderRadius: isGroup
-        ? ((selectedElement as fabric.Group).getObjects()[0] as fabric.Rect)?.rx || 0
-        : (selectedElement as fabric.Rect)?.rx || 0,
+        ? ((selectedElement as fabric.Group).getObjects()[0] as fabric.Rect)
+            ?.rx || 0
+        : 0,
       backgroundColor: isGroup
-        ? (selectedElement as fabric.Group).getObjects()[0]?.fill?.toString() || ""
-        : selectedElement?.fill?.toString() || "",
-      textColor: isGroup
-        ? ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)?.fill?.toString() || ""
+        ? (selectedElement as fabric.Group).getObjects()[0]?.fill?.toString() ||
+          ""
         : "",
-      fontSize: (selectedElement as any)?.fontSize || "",
-      fontFamily: (selectedElement as any)?.fontFamily || "",
-      fontWeight: (selectedElement as any)?.fontWeight || "",
+      textColor: isGroup
+        ? (selectedElement as fabric.Group).getObjects()[1]?.fill?.toString() ||
+          ""
+        : "",
+      // @ts-ignore
+      fontSize: selectedElement?.fontSize || "",
+      // @ts-ignore
+      fontFamily: selectedElement?.fontFamily || "",
+      // @ts-ignore
+      fontWeight: selectedElement?.fontWeight || "",
       buttonText: isGroup
-        ? ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)?.text || ""
+        ? ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)
+            ?.text || ""
         : "",
     });
   }
