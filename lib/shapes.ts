@@ -257,9 +257,7 @@ export const createLocationCoordinates = async (pointer: PointerEvent) : Promise
       const data = await response.json();
       const address = data.display_name;
 
-      console.log(address);
-      
-      const text = `${address}\nLatitude: ${latitude}, Longitude: ${longitude}`;
+      const text = `${data.address.amenity}\n${data.address.road}\n${data.address.town} ${data.address.postcode}\nLatitude: ${latitude}, Longitude: ${longitude}`;
       
       const textObject = new fabric.Text(text, {
         left: pointer.x,
@@ -270,6 +268,7 @@ export const createLocationCoordinates = async (pointer: PointerEvent) : Promise
         objectId: uuidv4(),
         selectable: true,
         editable: false,
+        width: 200,
       } as fabric.ITextOptions);
 
       resolve(textObject);
