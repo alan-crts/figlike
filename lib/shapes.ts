@@ -65,10 +65,10 @@ export const createText = (pointer: PointerEvent, text: string) => {
   } as fabric.ITextOptions);
 };
 
-export const createSpecificShape = (
+export const createSpecificShape = async (
   shapeType: string,
   pointer: PointerEvent
-) => {
+): Promise<fabric.Object | null> => {
   switch (shapeType) {
     case "rectangle":
       return createRectangle(pointer);
@@ -84,8 +84,13 @@ export const createSpecificShape = (
 
     case "text":
       return createText(pointer, "Tap to Type");
+
     case "button":
       return createEditableButton(pointer);
+
+    case "location":
+      return await createLocationCoordinates(pointer);
+
     default:
       return null;
   }
@@ -239,4 +244,38 @@ export const createEditableButton = (pointer: PointerEvent) => {
   } as fabric.IGroupOptions & { objectId: string });
 
   return group;
+};
+
+export const createLocationCoordinates = async (pointer: PointerEvent) : Promise<fabric.Object | null> => {
+  return new Promise((resolve, reject) => {
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const { latitude, longitude } = position.coords;
+    
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+      );
+      const data = await response.json();
+      const address = data.display_name;
+
+      const text = `${data.address.amenity}\n${data.address.road}\n${data.address.town} ${data.address.postcode}\nLatitude: ${latitude}, Longitude: ${longitude}`;
+      
+      const textObject = new fabric.Text(text, {
+        left: pointer.x,
+        top: pointer.y,
+        fill: "#FFFFFF",
+        fontFamily: "Arial",
+        fontSize: 20,
+        objectId: uuidv4(),
+        selectable: true,
+        editable: false,
+        width: 200,
+      } as fabric.ITextOptions);
+
+      resolve(textObject);
+    },
+    (error) => {
+      reject(error);
+    }
+  );
+  });
 };

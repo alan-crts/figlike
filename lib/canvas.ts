@@ -38,7 +38,7 @@ export const initializeFabric = ({
 };
 
 // instantiate creation of custom fabric object/shape and add it to canvas
-export const handleCanvasMouseDown = ({
+export const handleCanvasMouseDown = async ({
   options,
   canvas,
   selectedShapeRef,
@@ -88,16 +88,18 @@ export const handleCanvasMouseDown = ({
   } else {
     isDrawing.current = true;
 
-    // create custom fabric object/shape and set it to shapeRef
-    shapeRef.current = createSpecificShape(
-      selectedShapeRef.current,
-      pointer as any
-    );
+    try {
+      // Attendre la résolution de createSpecificShape avec await
+      shapeRef.current = await createSpecificShape(
+        selectedShapeRef.current,
+        pointer as any
+      )
 
-    // if shapeRef is not null, add it to canvas
-    if (shapeRef.current) {
-      // add: http://fabricjs.com/docs/fabric.Canvas.html#add
-      canvas.add(shapeRef.current);
+      if (shapeRef.current) {
+        canvas.add(shapeRef.current);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la création de la forme:", error);
     }
   }
 };
@@ -276,18 +278,12 @@ export const handleCanvasSelectionCreated = ({
   isEditingRef,
   setElementAttributes,
 }: CanvasSelectionCreated) => {
-  // if user is editing manually, return
   if (isEditingRef.current) return;
-
-  // if no element is selected, return
   if (!options?.selected) return;
 
-  // get the selected element
   const selectedElement = options?.selected[0] as fabric.Object;
 
-  // if only one element is selected, set element attributes
   if (selectedElement && options.selected.length === 1) {
-    // calculate scaled dimensions of the object
     const scaledWidth = selectedElement?.scaleX
       ? selectedElement?.width! * selectedElement?.scaleX
       : selectedElement?.width;
@@ -296,30 +292,28 @@ export const handleCanvasSelectionCreated = ({
       ? selectedElement?.height! * selectedElement?.scaleY
       : selectedElement?.height;
 
+    const isGroup = selectedElement instanceof fabric.Group;
+    
     setElementAttributes({
       width: scaledWidth?.toFixed(0).toString() || "",
       height: scaledHeight?.toFixed(0).toString() || "",
       fill: selectedElement?.fill?.toString() || "",
       stroke: selectedElement?.stroke || "",
-      borderRadius:
-        ((selectedElement as fabric.Group).getObjects()[0] as fabric.Rect)
-          ?.rx || 0,
-      backgroundColor:
-        (selectedElement as fabric.Group).getObjects()[0]?.fill?.toString() ||
-        "",
-      textColor:
-        (
-          (selectedElement as fabric.Group).getObjects()[1] as fabric.Text
-        )?.fill?.toString() || "",
-      // @ts-ignore
-      fontSize: selectedElement?.fontSize || "",
-      // @ts-ignore
-      fontFamily: selectedElement?.fontFamily || "",
-      // @ts-ignore
-      fontWeight: selectedElement?.fontWeight || "",
-      buttonText:
-        ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)
-          ?.text || "",
+      borderRadius: isGroup
+        ? ((selectedElement as fabric.Group).getObjects()[0] as fabric.Rect)?.rx || 0
+        : (selectedElement as fabric.Rect)?.rx || 0,
+      backgroundColor: isGroup
+        ? (selectedElement as fabric.Group).getObjects()[0]?.fill?.toString() || ""
+        : selectedElement?.fill?.toString() || "",
+      textColor: isGroup
+        ? ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)?.fill?.toString() || ""
+        : "",
+      fontSize: (selectedElement as any)?.fontSize || "",
+      fontFamily: (selectedElement as any)?.fontFamily || "",
+      fontWeight: (selectedElement as any)?.fontWeight || "",
+      buttonText: isGroup
+        ? ((selectedElement as fabric.Group).getObjects()[1] as fabric.Text)?.text || ""
+        : "",
     });
   }
 };
