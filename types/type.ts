@@ -56,6 +56,10 @@ export type Attributes = {
   fontWeight: string;
   fill: string;
   stroke: string;
+  borderRadius: number;
+  backgroundColor: string;
+  textColor: string;
+  buttonText: string;
 };
 
 export type ActiveElement = {

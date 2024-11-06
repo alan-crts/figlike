@@ -31,6 +31,11 @@ export const shapeElements = [
     name: "Free Drawing",
     value: "freeform",
   },
+  {
+    icon: "/assets/button.svg",
+    name: "Button",
+    value: "button",
+  },
 ];
 
 export const navElements = [

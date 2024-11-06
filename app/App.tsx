@@ -134,6 +134,10 @@ const Home = () => {
     fontWeight: "",
     fill: "#aabbcc",
     stroke: "#aabbcc",
+    borderRadius: 0,
+    backgroundColor: "#aabbcc",
+    textColor: "#aabbcc",
+    buttonText: "",
   });
 
   /**
