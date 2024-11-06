@@ -1,12 +1,14 @@
 import React, { useMemo, useRef } from "react";
 
 import { RightSidebarProps } from "@/types/type";
-import { bringElement, modifyShape } from "@/lib/shapes";
+import { modifyShape } from "@/lib/shapes";
 
 import Text from "./settings/Text";
 import Color from "./settings/Color";
 import Export from "./settings/Export";
 import Dimensions from "./settings/Dimensions";
+import { exportToHtml } from "@/lib/utils";
+import { Button } from "./ui/button";
 import ButtonStyles from "./settings/ButtonStyles";
 
 const RightSidebar = ({
@@ -74,6 +76,16 @@ const RightSidebar = ({
         />
 
         <Export />
+
+        <div className='flex flex-col gap-3 px-5 py-3'>
+          <Button
+            variant='outline'
+            className='w-full border border-primary-grey-100 hover:bg-primary-green hover:text-primary-black'
+            onClick={exportToHtml}
+          >
+            Export to HTML
+          </Button>
+        </div>
 
         {activeObjectRef.current?.type === "group" && (
           <ButtonStyles
